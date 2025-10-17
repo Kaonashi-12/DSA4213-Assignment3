@@ -1,0 +1,84 @@
+# Configuration for BERT Fine-tuning Experiments
+
+# Model settings
+model:
+  name: "bert-base-uncased"
+  num_labels: 4
+  max_length: 128
+
+# Dataset settings
+data:
+  name: "ag_news"
+  train_size: 10000
+  val_size: 0.1
+  test_size: 0.1
+  few_shot_sizes: [10, 50, 100]
+
+# Training settings
+training:
+  batch_size: 64  # Increased from 32
+  gradient_accumulation_steps: 2  # Effective batch size = 128
+  learning_rate: 2e-5
+  num_epochs: 10
+  warmup_steps: 100
+  weight_decay: 0.01
+  seed: 42
+  fp16: true  # Enable mixed precision training
+  num_workers: 4  # Parallel data loading
+  logging_steps: 100
+  eval_steps: 500
+  save_steps: 1000
+  metric_for_best_model: "accuracy"
+  
+  # Early stopping settings
+  early_stopping:
+    enabled: true
+    patience: 3
+    min_delta: 0.001
+
+# Model saving settings
+checkpoint:
+  save_best_model: true
+  save_last_model: true
+  checkpoint_dir: "./outputs/checkpoints"
+  save_optimizer_state: false
+
+# Fine-tuning strategies
+strategies:
+  full_finetuning:
+    enabled: true
+  
+  lora:
+    enabled: true
+    r: 8
+    lora_alpha: 16
+    lora_dropout: 0.1
+    target_modules: ["query", "key", "value"]
+    rank_values: [4, 8, 16]
+  
+  bitfit:
+    enabled: true
+  
+  prompt_tuning:
+    enabled: true
+    num_virtual_tokens: 10
+    prompt_tuning_init: "random"
+
+# Ablation study settings
+ablation:
+  learning_rates: [1e-5, 2e-5, 5e-5]
+  schedulers: ["linear", "cosine"]
+
+# Visualization settings
+visualization:
+  attention_heads: [0, 5, 11]
+  save_attention_plots: false
+  save_performance_plots: true
+
+# Experiment settings
+experiment:
+  output_dir: "./outputs"
+  cache_dir: "./cache"
+  use_wandb: false
+  wandb_project: "bert-finetuning"
+  experiment_name: "baseline"
